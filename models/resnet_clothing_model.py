@@ -36,6 +36,19 @@ class ClothingClassifier(nn.Module):
         x = self.classifier(x)
         return x
 
+    def predict(self, image, transform, device='cpu'):
+        selected_labels = ["Blouse", "Cardigan", "Jacket", "Sweater", "Tank", "Tee", "Top", 
+                            "Jeans", "Shorts", "Skirts", "Dress"]
+        label_mapping = {new: name for new, name in enumerate(selected_labels)}
+
+        self.eval()
+        image_transformed = transform(image).unsqueeze(0).to(device)
+        with torch.no_grad():
+            preds = self(image_transformed)
+            predicted = torch.argmax(preds, dim=1).item()
+        garment_class = "A" if predicted < 7 else ("B" if predicted < 10 else "C")
+        return label_mapping[predicted], garment_class
+
 class Custom2DCNN(nn.Module):
     def __init__(self, num_classes):
         super(Custom2DCNN, self).__init__()
